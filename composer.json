@@ -1,0 +1,57 @@
+{
+    "name": "jardisadapter/filesystem",
+    "description": "Filesystem abstraction for local and cloud storage with unified read, write, and stream API",
+    "type": "library",
+    "license": "proprietary",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Headgent Development",
+            "email": "jardisDev@headgent.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/jardisSupport/contract"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "jardissupport/contract": "^1.0",
+        "ext-curl": "*",
+        "ext-fileinfo": "*",
+        "ext-simplexml": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "phpstan/phpstan": "^2.0.4",
+        "squizlabs/php_codesniffer": "^3.11.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "JardisAdapter\\Filesystem\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JardisAdapter\\Filesystem\\Tests\\": "tests/"
+        }
+    },
+    "homepage": "https://github.com/jardisAdapter/filesystem",
+    "support": {
+        "issues": "https://github.com/jardisAdapter/filesystem/issues",
+        "email": "jardisDev@headgent.com"
+    },
+    "keywords": [
+        "filesystem",
+        "storage",
+        "file",
+        "local",
+        "cloud",
+        "domain driven design",
+        "jardis",
+        "Headgent"
+    ]
+}
