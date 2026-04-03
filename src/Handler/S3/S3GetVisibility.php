@@ -102,5 +102,4 @@ final class S3GetVisibility
 
         return self::VISIBILITY_PRIVATE;
     }
-
 }

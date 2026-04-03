@@ -85,5 +85,4 @@ final class S3SetVisibility
             );
         }
     }
-
 }

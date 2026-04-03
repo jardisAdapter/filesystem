@@ -96,5 +96,4 @@ final class S3Request
             'body' => $responseBody,
         ];
     }
-
 }

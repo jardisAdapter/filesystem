@@ -131,5 +131,4 @@ final class S3ListContents
             $continuationToken = ($isTruncated && $token !== '') ? $token : null;
         } while ($continuationToken !== null);
     }
-
 }

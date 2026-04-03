@@ -148,5 +148,4 @@ final class S3DeleteDirectory
             );
         }
     }
-
 }
