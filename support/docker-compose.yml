@@ -1,0 +1,52 @@
+services:
+  phpcli:
+    image: ${DOCKER_HUB:-headgent}/phpcli:${PHP_VERSION:-8.3}
+    container_name: phpcli
+    environment:
+      - PHP_MEMORY_LIMIT=${PHP_MEMORY_LIMIT:-512M}
+      - PHP_MAX_EXECUTION_TIME=${PHP_MAX_EXECUTION_TIME:-0}
+      - PHP_TIMEZONE=${PHP_TIMEZONE:-UTC}
+      - APCU_SHM_SIZE=${APCU_SHM_SIZE:-64M}
+      - OPCACHE_MEMORY_CONSUMPTION=${OPCACHE_MEMORY_CONSUMPTION:-128}
+      - OPCACHE_MAX_ACCELERATED_FILES=${OPCACHE_MAX_ACCELERATED_FILES:-4000}
+      - OPCACHE_REVALIDATE_FREQ=${OPCACHE_REVALIDATE_FREQ:-2}
+      - PHP_ERROR_REPORTING=${PHP_ERROR_REPORTING:-"E_ALL & ~E_DEPRECATED & ~E_STRICT"}
+      - PHP_DISPLAY_ERRORS=${PHP_DISPLAY_ERRORS:-Off}
+      - PHP_LOG_ERRORS=${PHP_LOG_ERRORS:-On}
+      - XDEBUG_MODE=${XDEBUG_MODE:-debug}
+      - XDEBUG_START_WITH_REQUEST=${XDEBUG_START_WITH_REQUEST:-yes}
+      - XDEBUG_CLIENT_HOST=${XDEBUG_CLIENT_HOST:-host.docker.internal}
+      - XDEBUG_CLIENT_PORT=${XDEBUG_CLIENT_PORT:-9003}
+      - XDEBUG_LOG_LEVEL=${XDEBUG_LOG_LEVEL:-0}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://minio:9000}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_BUCKET=${MINIO_BUCKET:-testbucket}
+      - MINIO_REGION=${MINIO_REGION:-us-east-1}
+    volumes:
+      - ../:/app
+    working_dir: /app
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - filesystem-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+    networks:
+      - filesystem-network
+
+networks:
+  filesystem-network:
+    driver: bridge
