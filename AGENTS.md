@@ -9,7 +9,7 @@ Unified filesystem abstraction for local and S3-compatible backends (AWS, MinIO,
 - **Contracts split into Reader/Writer** (`FilesystemReaderInterface` + `FilesystemWriterInterface`). For read-only consumers inject only the reader.
 - **Visibility (`public`/`private`) not in the Contract** — only on the concrete `Filesystem` object. Reflection/feature check before calling if necessary.
 - **Security is built in and cannot be bypassed:** Path traversal + null bytes rejected, symlink escape via `realpath()` containment, bucket-wipe guard on empty S3 prefix, `LIBXML_NONET` against XXE. `S3Config::$secret` is masked via `#[\SensitiveParameter]` + `__debugInfo()`.
-- **Exception hierarchy:** Catch `FileNotFoundException`/`FileExistsException`/`UnableTo*Exception` specifically; base is `FilesystemExceptionInterface` from `jardissupport/contract`.
+- **Exception hierarchy:** Catch `FileNotFoundException`/`FileExistsException`/`UnableTo*Exception` specifically; base is `FilesystemExceptionInterface` from `jardissupport/contracts`.
 
 ## Full Reference
 
