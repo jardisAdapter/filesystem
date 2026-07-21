@@ -259,7 +259,7 @@ Each handler is an **invokable object** (`__invoke`) — independently testable,
 
 ## Contracts
 
-The package implements interfaces from `jardissupport/contract`:
+The package implements interfaces from `jardissupport/contracts`:
 
 | Interface | Purpose |
 |-----------|---------|

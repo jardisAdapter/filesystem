@@ -171,7 +171,7 @@ developer, who builds the Config objects and passes them to `FilesystemService`.
 ## DEPENDENCIES
 | Package | Purpose |
 |---------|---------|
-| `jardissupport/contract ^1.0 \|\| ^2.0` | Filesystem interfaces |
+| `jardissupport/contracts ^1.0` | Filesystem interfaces |
 | `ext-curl` | S3 API calls |
 | `ext-fileinfo` | MIME type detection (local) |
 | `ext-simplexml` | S3 XML response parsing |
