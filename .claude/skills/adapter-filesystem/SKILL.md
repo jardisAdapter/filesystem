@@ -17,13 +17,7 @@ FilesystemService (implements FilesystemServiceInterface)
   ├── local(root): FilesystemInterface        ← interface method
   ├── s3(bucket, region, key, secret, endpoint?, prefix?): FilesystemInterface  ← interface method
   └── create(LocalConfig|S3Config): FilesystemInterface  ← concrete service only
-
-Filesystem (Orchestrator, implements FilesystemInterface)
-  ├── buildLocal() → PathNormalizer + LocalFullPath (containment) + 17 atomic Handler/Local/*
-  └── buildS3()    → S3Signer (AWS Sig v4) + S3Request (cURL) + 18 atomic Handler/S3/*
 ```
-
-**Handler pattern:** Each Handler is `final`, one `__invoke()`, no additional public methods. Orchestrator extracts `->__invoke(...)` as Closure in constructor — no Handler object survives as a property.
 
 ## API
 
@@ -150,17 +144,11 @@ FS_S3_ENDPOINT=https://s3.amazonaws.com
 FS_S3_PREFIX=uploads/
 ```
 ## KERNEL INTEGRATION
-`jardiscore/foundation` is deleted; its `Handler\FilesystemHandler` was ported 1:1 into
-`jardiscore/kernel` as `Bootstrap\Handler\BuildFilesystemFromEnv`, which the packer
-`Bootstrap\BuildDomainKernelFromEnv` composes into the `DomainKernel`.
-
-Access: `$kernel->filesystem(): ?FilesystemServiceInterface` (`core/kernel/src/DomainKernel.php:106`).
+Access: `$kernel->filesystem(): ?FilesystemServiceInterface` — s. Skill core-kernel.
 Returns the instance or `null` — there is no third state; the accessor is typed
 `?FilesystemServiceInterface`, so `false` is impossible. `null` means: adapter not installed.
 
-**The kernel reads no ENV for this adapter.** `BuildFilesystemFromEnv` takes no arguments and
-returns a stateless `FilesystemService` factory (`core/kernel/src/Bootstrap/Handler/BuildFilesystemFromEnv.php:20-32`) —
-it is one of the handlers that need no ENV. The `FS_*`/`FS_S3_*` variables above are read by the
+**The kernel reads no ENV for this adapter.** The `FS_*`/`FS_S3_*` variables above are read by the
 developer, who builds the Config objects and passes them to `FilesystemService`.
 
 ## RULES
