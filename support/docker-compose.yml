@@ -17,32 +17,33 @@ services:
       - XDEBUG_CLIENT_HOST=${XDEBUG_CLIENT_HOST:-host.docker.internal}
       - XDEBUG_CLIENT_PORT=${XDEBUG_CLIENT_PORT:-9003}
       - XDEBUG_LOG_LEVEL=${XDEBUG_LOG_LEVEL:-0}
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-http://minio:9000}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-minioadmin}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-minioadmin}
-      - MINIO_BUCKET=${MINIO_BUCKET:-testbucket}
-      - MINIO_REGION=${MINIO_REGION:-us-east-1}
+      - S3_TEST_ENDPOINT=${S3_TEST_ENDPOINT:-http://filesystem-s3:9000}
+      - S3_TEST_ACCESS_KEY=${S3_TEST_ACCESS_KEY:-s3testadmin}
+      - S3_TEST_SECRET_KEY=${S3_TEST_SECRET_KEY:-s3testadmin}
+      - S3_TEST_BUCKET=${S3_TEST_BUCKET:-testbucket}
+      - S3_TEST_REGION=${S3_TEST_REGION:-us-east-1}
+      - S3_TEST_ACL_SUPPORTED=${S3_TEST_ACL_SUPPORTED:-false}
     volumes:
       - ../:/app
     working_dir: /app
     depends_on:
-      minio:
+      filesystem-s3:
         condition: service_healthy
     networks:
       - filesystem-network
 
-  minio:
-    image: minio/minio:latest
-    container_name: minio
-    command: server /data --console-address ":9001"
+  filesystem-s3:
+    image: rustfs/rustfs:1.0.0
+    container_name: filesystem-s3
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+      RUSTFS_ACCESS_KEY: ${S3_TEST_ACCESS_KEY:-s3testadmin}
+      RUSTFS_SECRET_KEY: ${S3_TEST_SECRET_KEY:-s3testadmin}
+      RUSTFS_CONSOLE_ENABLE: "false"
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health"]
       interval: 2s
       timeout: 5s
-      retries: 10
+      retries: 15
     networks:
       - filesystem-network
 

@@ -28,7 +28,7 @@ use JardisAdapter\Filesystem\FilesystemService;
 $service = new FilesystemService();
 $fs = $service->local('/var/app/storage');
 $fs = $service->s3('my-bucket', 'eu-central-1', $key, $secret);
-$fs = $service->s3('bucket', 'us-east-1', $key, $secret, endpoint: 'http://minio:9000');
+$fs = $service->s3('bucket', 'us-east-1', $key, $secret, endpoint: 'http://filesystem-s3:9000');
 $fs = $service->create(new LocalConfig(root: '/storage', filePermissions: 0600));
 // create() is on concrete FilesystemService only, not on FilesystemServiceInterface
 ```

@@ -21,7 +21,7 @@
 - **Stream support** — read and write large files without memory overhead
 - **S3 without the SDK** — AWS Signature v4 via cURL, works with MinIO, DigitalOcean Spaces, etc.
 - **Security hardened** — path traversal protection, symlink containment, XXE prevention, secret masking
-- **~78% test coverage** — integration tests against real MinIO, not mocks
+- **~78% test coverage** — integration tests against a real S3-compatible server (RustFS), not mocks
 
 ---
 
@@ -305,8 +305,8 @@ No singleton, no handler call in application code — the developer decides how 
 ```bash
 cp .env.example .env    # One-time setup
 make install             # Install dependencies
-make start               # Start MinIO (S3 integration tests)
-make phpunit             # Run tests (121 tests, starts MinIO automatically)
+make start               # Start S3 test server (S3 integration tests)
+make phpunit             # Run tests (121 tests, starts the S3 test server automatically)
 make phpstan             # Static analysis (Level 8)
 make phpcs               # Coding standards (PSR-12)
 ```
