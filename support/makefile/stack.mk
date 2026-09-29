@@ -1,9 +1,8 @@
 <---stack-------->: ## -----------------------------------------------------------------------
 start: ## Start all services and wait until ready
-	$(DOCKER_COMPOSE) up -d --wait minio
+	$(DOCKER_COMPOSE) up -d --wait filesystem-s3
 	@echo "Creating test bucket..."
-	@docker exec minio mc alias set local http://localhost:9000 minioadmin minioadmin 2>/dev/null
-	@docker exec minio mc mb --ignore-existing local/testbucket 2>/dev/null || true
+	@docker exec filesystem-s3 curl -fsS -X PUT --user s3testadmin:s3testadmin --aws-sigv4 "aws:amz:us-east-1:s3" http://localhost:9000/testbucket >/dev/null 2>&1 || true
 	@echo "All services are ready!"
 .PHONY: start
 
