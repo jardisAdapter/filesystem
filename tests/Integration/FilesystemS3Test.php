@@ -61,6 +61,21 @@ final class FilesystemS3Test extends TestCase
         ));
     }
 
+    /**
+     * Test default is 'true': the suite targets a real S3 / ACL-capable server unless told otherwise.
+     * Compose and .env.example set 'false' because the bundled RustFS stub does not persist ACLs.
+     */
+    private function skipUnlessAclSupported(): void
+    {
+        $aclSupported = $_ENV['S3_TEST_ACL_SUPPORTED'] ?? getenv('S3_TEST_ACL_SUPPORTED') ?: 'true';
+        if (strtolower((string) $aclSupported) === 'false') {
+            $this->markTestSkipped(
+                'S3 test server does not persist object ACLs (RustFS 1.0.0 stub: PUT ?acl accepted, '
+                . 'GET ?acl returns owner grant only) — adapter behaviour not verifiable here'
+            );
+        }
+    }
+
     protected function tearDown(): void
     {
         if (!isset($this->fs)) {
@@ -236,13 +251,7 @@ final class FilesystemS3Test extends TestCase
         // returns 200 with an empty body, but GET /obj?acl always returns 200 with a single
         // FULL_CONTROL owner grant and no AllUsers grant. The adapter is correct; the server
         // does not persist object ACLs. Opt-out via S3_TEST_ACL_SUPPORTED=false (visible skip).
-        $aclSupported = $_ENV['S3_TEST_ACL_SUPPORTED'] ?? getenv('S3_TEST_ACL_SUPPORTED') ?: 'true';
-        if (strtolower((string) $aclSupported) === 'false') {
-            $this->markTestSkipped(
-                'S3 test server does not persist object ACLs (RustFS 1.0.0 stub: PUT ?acl accepted, '
-                . 'GET ?acl returns owner grant only) — adapter behaviour not verifiable here'
-            );
-        }
+        $this->skipUnlessAclSupported();
 
         $this->fs->write('visible.txt', 'data');
 
@@ -257,6 +266,10 @@ final class FilesystemS3Test extends TestCase
 
     public function testVisibilityPrivate(): void
     {
+        // Same reason as testVisibilityPublic: against an ACL stub the assertion is trivially green
+        // (owner-only grant reads back as 'private'), so it proves nothing there.
+        $this->skipUnlessAclSupported();
+
         $this->fs->write('private.txt', 'data');
 
         try {
