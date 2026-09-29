@@ -39,14 +39,14 @@ final class FilesystemS3Test extends TestCase
 
     protected function setUp(): void
     {
-        $endpoint = $_ENV['MINIO_ENDPOINT'] ?? getenv('MINIO_ENDPOINT') ?: '';
-        $key = $_ENV['MINIO_ACCESS_KEY'] ?? getenv('MINIO_ACCESS_KEY') ?: '';
-        $secret = $_ENV['MINIO_SECRET_KEY'] ?? getenv('MINIO_SECRET_KEY') ?: '';
-        $bucket = $_ENV['MINIO_BUCKET'] ?? getenv('MINIO_BUCKET') ?: '';
-        $region = $_ENV['MINIO_REGION'] ?? getenv('MINIO_REGION') ?: 'us-east-1';
+        $endpoint = $_ENV['S3_TEST_ENDPOINT'] ?? getenv('S3_TEST_ENDPOINT') ?: '';
+        $key = $_ENV['S3_TEST_ACCESS_KEY'] ?? getenv('S3_TEST_ACCESS_KEY') ?: '';
+        $secret = $_ENV['S3_TEST_SECRET_KEY'] ?? getenv('S3_TEST_SECRET_KEY') ?: '';
+        $bucket = $_ENV['S3_TEST_BUCKET'] ?? getenv('S3_TEST_BUCKET') ?: '';
+        $region = $_ENV['S3_TEST_REGION'] ?? getenv('S3_TEST_REGION') ?: 'us-east-1';
 
         if ($endpoint === '' || $key === '' || $secret === '' || $bucket === '') {
-            $this->markTestSkipped('MinIO not configured (MINIO_ENDPOINT, MINIO_ACCESS_KEY, MINIO_SECRET_KEY, MINIO_BUCKET)');
+            $this->markTestSkipped('S3 test server not configured (S3_TEST_ENDPOINT, S3_TEST_ACCESS_KEY, S3_TEST_SECRET_KEY, S3_TEST_BUCKET)');
         }
 
         $this->prefix = 'test_' . uniqid() . '/';
@@ -232,13 +232,25 @@ final class FilesystemS3Test extends TestCase
 
     public function testVisibilityPublic(): void
     {
+        // RustFS 1.0.0 ACL stub (verified 2026-09-29): PUT /obj?acl with x-amz-acl: public-read
+        // returns 200 with an empty body, but GET /obj?acl always returns 200 with a single
+        // FULL_CONTROL owner grant and no AllUsers grant. The adapter is correct; the server
+        // does not persist object ACLs. Opt-out via S3_TEST_ACL_SUPPORTED=false (visible skip).
+        $aclSupported = $_ENV['S3_TEST_ACL_SUPPORTED'] ?? getenv('S3_TEST_ACL_SUPPORTED') ?: 'true';
+        if (strtolower((string) $aclSupported) === 'false') {
+            $this->markTestSkipped(
+                'S3 test server does not persist object ACLs (RustFS 1.0.0 stub: PUT ?acl accepted, '
+                . 'GET ?acl returns owner grant only) — adapter behaviour not verifiable here'
+            );
+        }
+
         $this->fs->write('visible.txt', 'data');
 
         try {
             $this->fs->setVisibility('visible.txt', 'public');
             $this->assertSame('public', $this->fs->getVisibility('visible.txt'));
         } catch (\JardisAdapter\Filesystem\Exception\UnableToWriteException $e) {
-            // MinIO does not support ACL-based visibility (HTTP 501)
+            // S3 test server may not support ACL-based visibility (HTTP 501)
             $this->assertStringContainsString('501', $e->getMessage());
         }
     }
@@ -251,7 +263,7 @@ final class FilesystemS3Test extends TestCase
             $this->fs->setVisibility('private.txt', 'private');
             $this->assertSame('private', $this->fs->getVisibility('private.txt'));
         } catch (\JardisAdapter\Filesystem\Exception\UnableToWriteException $e) {
-            // MinIO does not support ACL-based visibility (HTTP 501)
+            // S3 test server may not support ACL-based visibility (HTTP 501)
             $this->assertStringContainsString('501', $e->getMessage());
         }
     }
