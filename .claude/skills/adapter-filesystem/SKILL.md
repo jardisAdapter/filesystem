@@ -4,7 +4,7 @@ description: jardisadapter/filesystem - Local and S3 filesystem abstraction with
 user-invocable: false
 zone: post-active
 persona: C
-prerequisites: [rules-architecture, rules-patterns]
+prerequisites: [foundation-architecture, foundation-patterns]
 next: []
 ---
 
