@@ -279,22 +279,15 @@ public function __construct(
 
 ## Jardis Kernel Integration
 
-`jardiscore/foundation` is deleted. Its `Handler\FilesystemHandler` was ported 1:1 into `jardiscore/kernel` as `Bootstrap\Handler\BuildFilesystemFromEnv`, which the packer `Bootstrap\BuildDomainKernelFromEnv` composes into the `DomainKernel`. In a class extending `{Domain}Context`, the filesystem is available via `resource()`:
+`jardiscore/kernel` provides `Bootstrap\Handler\BuildFilesystemFromEnv`, which the packer `Bootstrap\BuildDomainKernelFromEnv` composes into the `DomainKernel`. In a class extending `{Domain}Context`, the filesystem is available via `resource()`:
 
 ```php
 $uploads = $this->resource()->filesystem()->local('/storage/uploads');
-
-$backups = $this->resource()->filesystem()->s3(
-    bucket: $env('FS_BACKUPS_BUCKET'),
-    region: $env('FS_BACKUPS_REGION'),
-    key: $env('FS_BACKUPS_KEY'),
-    secret: $env('FS_BACKUPS_SECRET'),
-);
 ```
 
-`DomainKernel::filesystem()` is typed `?FilesystemServiceInterface` (`core/kernel/src/DomainKernel.php:106`) — the return value is the instance or `null`, there is no third state; `null` means the adapter is not installed.
+`DomainKernel::filesystem()` is typed `?FilesystemServiceInterface` — the return value is the instance or `null`, there is no third state; `null` means the adapter is not installed.
 
-**The kernel reads no ENV for this adapter.** `BuildFilesystemFromEnv` takes no arguments and returns a stateless `FilesystemService` factory — the developer reads the `FS_*`/`FS_S3_*` variables above directly, builds the Config objects, and passes them to `FilesystemService`.
+**The kernel reads no ENV for this adapter.** `BuildFilesystemFromEnv` takes no arguments and returns a stateless `FilesystemService` factory — the developer reads any configuration (for example S3 credentials) from wherever the project keeps it and passes it to the `FilesystemService` methods.
 
 No singleton, no handler call in application code — the developer decides how many filesystem instances exist and how they are configured. `resource()->filesystem()` returns `FilesystemServiceInterface`.
 
